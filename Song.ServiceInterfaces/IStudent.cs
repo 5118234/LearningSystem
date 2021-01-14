@@ -382,9 +382,15 @@ namespace Song.ServiceInterfaces
         /// 学员所有学习课程的记录
         /// </summary>
         /// <param name="stid"></param>
-        /// <param name="stid"></param>
         /// <returns>datatable中LastTime列为学习时间；studyTime：学习时间</returns>
         DataTable StudentStudyCourseLog(int stid);
+        /// <summary>
+        /// 学员指定学习课程的记录
+        /// </summary>
+        /// <param name="stid"></param>
+        /// <param name="couids">课程id,逗号分隔</param>
+        /// <returns></returns>
+        DataTable StudentStudyCourseLog(int stid,string couids);
         /// <summary>
         /// 学员所有学习某一课程的记录
         /// </summary>

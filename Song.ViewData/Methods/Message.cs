@@ -16,7 +16,7 @@ namespace Song.ViewData.Methods
     /// <summary>
     /// 课程学习中的咨询留言，可作为弹幕
     /// </summary>
-    public class Message : IViewAPI
+    public class Message : ViewMethod, IViewAPI
     {
         ///// <summary>
         ///// 添加留言
@@ -81,6 +81,17 @@ namespace Song.ViewData.Methods
         public Song.Entities.Message[] All(int olid, string order)
         {
             return Business.Do<IMessage>().GetAll(olid, order);
+        }
+        /// <summary>
+        /// 获取指定数量的留言
+        /// </summary>
+        /// <param name="olid">章节id</param>
+        /// <param name="order">排序方式，desc或asc</param>
+        /// <param name="count">取多少条</param>
+        /// <returns></returns>
+        public Song.Entities.Message[] Count(int olid, string order,int count)
+        {
+            return Business.Do<IMessage>().GetCount(-1, olid, order, count);
         }
         /// <summary>
         /// 获取留言数量

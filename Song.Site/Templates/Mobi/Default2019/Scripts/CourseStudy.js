@@ -186,9 +186,9 @@ var vdata = new Vue({
 					//video.setAttribute("x5-video-player-fullscreen", "true");
 					video.setAttribute("x5-video-orientation", "portraint");
 					video.setAttribute("controlsList", "nodownload");
-				}else{
-					video.setAttribute("x-webkit-airplay",true);
-					video.setAttribute("x5-video-player-type","h5");
+				} else {
+					video.setAttribute("x-webkit-airplay", true);
+					video.setAttribute("x5-video-player-type", "h5");
 				}
 			}, 3000);
 			//给video对象增加属性
@@ -202,7 +202,7 @@ var vdata = new Vue({
 			vdata.olid = olid;
 			if (event != null) event.preventDefault();
 			//获取当前章节状态，和专业信息
-			$api.all(
+			$api.bat(
 				$api.get("Outline/ForID", {
 					id: olid
 				}),
@@ -214,12 +214,12 @@ var vdata = new Vue({
 					vdata.outline = ol.data.result;
 					vdata.state = state.data.result;
 					if (!vdata.state.isLive && vdata.state.PlayTime > 0) {
-						//if (window.confirm("是否从上次进度播放？")) {
+						/*if (window.confirm("是否从上次进度播放？")) {
 							vdata.videoSeek(vdata.state.PlayTime / 1000);
 							window.setTimeout(function() {
 								if (vdata.playready()) vdata.player.play();
 							}, 500);
-						//}
+						}*/
 					}
 					//视频播放记录
 					var result = state.data.result;
@@ -321,9 +321,10 @@ var vdata = new Vue({
 		//获取当前章节的留言信息
 		msgGet: function() {
 			if (!vdata.olid || vdata.olid < 1) return;
-			$api.post("message/All", {
-				olid: vdata.olid,
-				order: 'desc'
+			$api.post("message/count", {
+				 olid: vdata.olid,
+                order: 'asc',
+                count:100
 			}).then(function(req) {
 				var d = req.data;
 				if (d.success) {
@@ -336,14 +337,14 @@ var vdata = new Vue({
 					throw "留言信息加载异常！详情：\r" + d.message;
 				}
 			}).catch(function(err) {
-				//alert(err);
-			});
+				alert(err);
+			});			
 		}
 	},
 	created: function() {
 		var couid = $api.querystring("couid");
-		$api.all(
-			$api.get("Outline/tree", {
+		$api.bat(
+			$api.post("Outline/tree", {
 				couid: couid
 			}),
 			$api.get("Course/ForID", {
@@ -362,6 +363,8 @@ var vdata = new Vue({
 		})).catch(function(err) {
 			alert(err);
 		});
+        //定时刷新（加载）咨询留言
+        window.setInterval('vdata.msgGet()', 1000 * 10);
 	}
 });
 vdata.$mount('#context-box');

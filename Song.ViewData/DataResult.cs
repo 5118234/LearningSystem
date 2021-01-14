@@ -49,7 +49,7 @@ namespace Song.ViewData
         /// <summary>
         /// 详细的异常信息
         /// </summary>
-        public Exception Exception { get; set; }
+        public Exception Exception { get; set; }       
         /// <summary>
         /// 实际返回的数据
         /// </summary>
@@ -78,7 +78,7 @@ namespace Song.ViewData
         /// 
         /// </summary>
         /// <param name="exc"></param>
-        public DataResult(Exception exc)
+        public DataResult(Exception exc, DateTime time)
         {
             Success = false;
             DateTime = DateTime.Now;
@@ -86,12 +86,14 @@ namespace Song.ViewData
             Exception = exc;
             if (exc.InnerException != null)
             {
-                Message = exc.InnerException.Message;
+                Message = exc.InnerException.Message;               
             }
             else
             {
-                Message = exc.Message;
+                Message = exc.Message;              
             }
+            //执行时间
+            ExecSpan = ((TimeSpan)(DateTime.Now - time)).TotalMilliseconds;
             State = 0;
         }
 
@@ -165,6 +167,7 @@ namespace Song.ViewData
                 case "String":
                     str = value == null ? "" : value.ToString();
                     str = str.Replace(Environment.NewLine, "");
+                    str = Microsoft.JScript.GlobalObject.escape(str);
                     str = string.Format("\"{0}\"", str);
                     break;
                 case "Int32":
@@ -200,13 +203,9 @@ namespace Song.ViewData
                         }
                     }
                     break;
-                case "Exception":
-                    Exception ex = (Exception)value;
-                    str = ex == null ? "" : ex.Message;
-                    str = string.Format("\"{0}\"", str);
-                    break;
                 default:
                     str = value == null ? "" : value.ToString();
+                    str = Microsoft.JScript.GlobalObject.escape(str);
                     str = string.Format("\"{0}\"", str);
                     break;
             }

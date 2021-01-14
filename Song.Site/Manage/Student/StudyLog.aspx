@@ -11,7 +11,7 @@
             DelButtonVisible="false" OutputButtonVisible="true" />
     </div>
     <cc1:GridView ID="GridView1" runat="server" AutoGenerateColumns="False" SelectBoxKeyName="SelectBox"
-        ShowSelectBox="false">
+        ShowSelectBox="true">
         <EmptyDataTemplate>
             没有满足条件的信息！
         </EmptyDataTemplate>
@@ -43,7 +43,7 @@
             <asp:TemplateField HeaderText="完成度">
                 <ItemStyle CssClass="center" Width="100px" />
                 <ItemTemplate>
-                    <%# Convert.ToDouble(Eval("complete", "{0}") == "" ? "0" : Eval("complete", "{0}")) >= 95 ? "100%" : Eval("complete", "{0:0.00}%")%>
+                    <%# Eval("complete", "{0:0.##}%")%>
                 </ItemTemplate>
             </asp:TemplateField>
             <asp:TemplateField HeaderText="详情">
@@ -55,5 +55,5 @@
             </asp:TemplateField>
         </Columns>
     </cc1:GridView>
-    <iframe src="" id="iframeExportDetails" link="Students_Details.aspx?sts=-1" scrolling="auto" style="display:none;" height="30" width="100%"></iframe>
+    <iframe src="" id="iframeExportDetails" link="Students_Details.aspx?id=<%= st!=null ? st.Ac_ID : 0 %>" scrolling="auto" style="display:none;" height="30" width="100%"></iframe>
 </asp:Content>

@@ -101,8 +101,11 @@ namespace Song.ServiceImpls
             //整理名称信息
             names = names.Replace("，", ",");
             List<string> listName = new List<string>();
-            foreach (string s in names.Split(','))
+            foreach (string str in names.Split(','))
+            {
+                string s = str.Replace("\n", "").Replace(" ", "").Replace("\t", "").Replace("\r", "");
                 if (s.Trim() != "") listName.Add(s.Trim());
+            }
             //
             int pid = 0;
             Song.Entities.Outline last = null;
@@ -112,7 +115,7 @@ namespace Song.ServiceImpls
                 if (current == null)
                 {
                     current = new Outline();
-                    current.Ol_Name = listName[i].Trim();
+                    current.Ol_Name = listName[i];
                     current.Ol_IsUse = true;
                     current.Org_ID = orgid;
                     current.Sbj_ID = sbjid;
@@ -176,7 +179,7 @@ namespace Song.ServiceImpls
                     }
                     catch (Exception ex)
                     {
-                        throw new Exception("直播流创建失败，" + ex.Message);
+                        //throw new Exception("直播流创建失败，" + ex.Message);
                     }
                     if (stream != null) entity.Ol_LiveID = stream.Title;
                 }

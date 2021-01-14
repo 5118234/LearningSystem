@@ -47,8 +47,11 @@ namespace Song.ServiceImpls
             //整理名称信息
             names = names.Replace("，", ",");
             List<string> listName = new List<string>();
-            foreach (string s in names.Split(','))
+            foreach (string str in names.Split(','))
+            {
+                string s = str.Replace("\n", "").Replace(" ", "").Replace("\t", "").Replace("\r", "");
                 if (s.Trim() != "") listName.Add(s.Trim());
+            }
             //
             int pid = 0;
             Song.Entities.Course last = null;
@@ -263,7 +266,7 @@ namespace Song.ServiceImpls
         /// <param name="identify">实体的主键</param>
         /// <returns></returns>
         public Course CourseSingle(int identify)
-        {
+        {            
             return Gateway.Default.From<Course>().Where(Course._.Cou_ID == identify).ToFirst<Course>();
         }
         /// <summary>
@@ -328,7 +331,7 @@ namespace Song.ServiceImpls
         /// 学员购买的该课程
         /// </summary>
         /// <param name="stid">学员Id</param>
-        /// <param name="sear">用于检索的字符</param>
+        /// <param name="sear">用于检索课程的字符</param>
         /// <param name="state">0不管是否过期，1必须是购买时效内的，2必须是购买时效外的</param>
         /// <returns></returns>
         public List<Course> CourseForStudent(int stid, string sear, int state, bool? istry, int count)
