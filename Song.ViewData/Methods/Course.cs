@@ -112,6 +112,119 @@ namespace Song.ViewData.Methods
             return per;
         }
 
+        /// <summary>
+        /// 所有选修该课程的人数（包括过期的）
+        /// </summary>
+        /// <param name="couid">课程id</param>
+        /// <returns></returns>
+        [HttpGet,HttpPut]
+        [Cache(Expires =1)]
+        public int StudentSum(int couid)
+        {
+            return Business.Do<ICourse>().CourseStudentSum(couid, null);
+        }
+        /// <summary>
+        /// 正在学习该课程的人数（过期的不算）
+        /// </summary>
+        /// <param name="couid">课程id</param>
+        /// <returns></returns>
+        [HttpGet, HttpPut]
+        [Cache(Expires = 1)]
+        public int StudySum(int couid)
+        {
+            return Business.Do<ICourse>().CourseStudentSum(couid, false);
+        }
+        /// <summary>
+        /// 获取课程价格信息
+        /// </summary>
+        /// <param name="uid">课程的uid，注意不是id</param>
+        /// <returns></returns>
+        [HttpGet, HttpPut]
+        [Cache(Expires = 60)]
+        public Song.Entities.CoursePrice[] Prices(string uid)
+        {
+            Song.Entities.CoursePrice[] prices = Business.Do<ICourse>().PriceCount(0, uid, true, 0);
+            return prices;
+        }
+        /// <summary>
+        /// 获取课程通知
+        /// </summary>
+        /// <param name="couid">课程的id</param>
+        /// <param name="count">取多少条通知</param>
+        /// <returns></returns>
+        [HttpGet, HttpPut]
+        [Cache(Expires = 60)]
+        public Song.Entities.Guide[] Guides(int couid,int count)
+        {
+            return Business.Do<IGuide>().GuideCount(-1, couid, -1, count);
+        }
+        /// <summary>
+        /// 当前登录学员，是否在学习这门课程
+        /// </summary>
+        /// <param name="couid"></param>
+        /// <returns></returns>
+        [Student]
+        public bool Studied(int couid)
+        {
+            Song.Entities.Accounts acc = this.Student;
+            bool isBuy = Business.Do<ICourse>().StudyIsCourse(acc.Ac_ID, couid);
+            return isBuy;
+        }
+        /// <summary>
+        /// 当前登录学员，是否可以学习该课程（学员可能未购买，但课程可以试用）
+        /// </summary>
+        /// <param name="couid">课程id</param>
+        /// <returns></returns>
+        [Student]
+        public bool StudyAllow(int couid)
+        {
+            Song.Entities.Accounts acc = this.Student;
+            bool isBuy = Business.Do<ICourse>().StudyIsCourse(acc.Ac_ID, couid);
+            Song.Entities.Course course = Business.Do<ICourse>().CourseSingle(couid);
+            //是否免费，或是限时免费
+            if (course.Cou_IsLimitFree)
+            {
+                DateTime freeEnd = course.Cou_FreeEnd.AddDays(1).Date;
+                if (!(course.Cou_FreeStart <= DateTime.Now && freeEnd >= DateTime.Now))
+                    course.Cou_IsLimitFree = false;
+            }
+            bool canStudy = isBuy || course.Cou_IsFree || course.Cou_IsLimitFree || course.Cou_IsTry;
+            return canStudy;
+        }
+        /// <summary>
+        /// 当前登录学员，是否购买过这门课程
+        /// </summary>
+        /// <param name="couid"></param>
+        /// <returns></returns>
+        [Student]
+        public bool Purchased(int couid)
+        {
+            Song.Entities.Accounts acc = Song.Extend.LoginState.Accounts.CurrentUser;
+            bool isBuy = Business.Do<ICourse>().StudyIsCourse(acc.Ac_ID, couid);
+            return isBuy;
+        }
+        /// <summary>
+        /// 购买课程的记录
+        /// </summary>
+        /// <param name="couid"></param>
+        /// <returns></returns>
+        [Student]
+        public Student_Course PurchaseRecord(int couid)
+        {
+            Song.Entities.Accounts acc = this.Student;
+            return Business.Do<ICourse>().StudentCourse(acc.Ac_ID, couid);
+        }
+        /// <summary>
+        /// 课程访问数
+        /// </summary>
+        /// <param name="couid">课程id</param>
+        /// <param name="step">每次访问增加多少</param>
+        /// <returns></returns>
+        public int Viewnum(int couid, int step)
+        {
+            if (step < 0) step = 0;
+            return Business.Do<ICourse>().CourseViewNum(couid, 1);
+        }
         #region 私有方法，处理对象的关联信息
         /// <summary>
         /// 处理课程信息，图片转为全路径，并生成clone对象
@@ -121,10 +234,18 @@ namespace Song.ViewData.Methods
         private Song.Entities.Course _tran(Song.Entities.Course cour)
         {
             if (cour == null) return cour;
+            //是否免费，或是限时免费
+            if (cour.Cou_IsLimitFree)
+            {
+                DateTime freeEnd = cour.Cou_FreeEnd.AddDays(1).Date;
+                if (!(cour.Cou_FreeStart <= DateTime.Now && freeEnd >= DateTime.Now))
+                    cour.Cou_IsLimitFree = false;
+            }
             string vpath = WeiSha.Common.Upload.Get["Course"].Virtual;
+            string hpath = WeiSha.Common.Upload.Get["Course"].Physics;
             Song.Entities.Course curr = cour.Clone<Song.Entities.Course>();
-            curr.Cou_Logo = vpath + curr.Cou_Logo;
-            curr.Cou_LogoSmall = vpath + curr.Cou_LogoSmall;
+            curr.Cou_Logo = System.IO.File.Exists(hpath + curr.Cou_Logo) ?  vpath + curr.Cou_Logo : "";
+            curr.Cou_LogoSmall = System.IO.File.Exists(hpath + curr.Cou_LogoSmall) ? vpath + curr.Cou_LogoSmall : "";          
             return curr;
         }
         #endregion

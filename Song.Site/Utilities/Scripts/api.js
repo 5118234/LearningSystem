@@ -18,6 +18,7 @@
         //调用地址的根路径
         baseURL: '',
         pathUrl: "/api/v{0}/", //url路径
+        apicache_location: true     //本机是否缓存数据
     };
     //版权信息
     var copyright = {};
@@ -54,10 +55,14 @@
                     val: arr[1]
                 });
             }
-            //返回
-            for (var q in values) {
-                if (values[q].key.toLowerCase() == key.toLowerCase())
-                    return values[q].val;
+            //如果不带参数，则返回所有参数
+            if (arguments.length <= 0) return values;
+            //如果key不等空，则返回
+            if (arguments.length == 1) {
+                for (var q in values) {
+                    if (values[q].key.toLowerCase() == key.toLowerCase())
+                        return values[q].val;
+                }
             }
             return defvalue;
         },
@@ -71,10 +76,7 @@
                     isExist = true;
                 }
             }
-            if (!isExist) values.push({
-                key: key,
-                val: value
-            });
+            if (!isExist) values.push({ key: key, val: value });
             //拼接Url      
             var url = String(window.document.location.href);
             if (url.indexOf("?") > -1) url = url.substring(0, url.lastIndexOf("?"));
@@ -214,7 +216,9 @@
         },
         //本地接口缓存,way:api请求路径,para：请求参数,value:api的返回值
         apicache: function (way, para, value) {
-            //if (window.location.hostname == 'localhost') return null;
+            if (!config.apicache_location) {
+                if (window.location.hostname == 'localhost') return null;
+            }
             //接口缓存名称，缓存指令，缓存项的名称
             var name, active = '', key;
             if (way.indexOf(":") > -1) {
