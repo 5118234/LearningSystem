@@ -31,8 +31,7 @@ namespace Song.ViewData.Methods
         /// <returns></returns>
         [HttpPost][HttpGet][HttpPut]
         [Cache]
-        [Localhost]
-        [Admin]
+        [Localhost]      
         public Helper_API[] List()
         {           
             List<Helper_API> list = new List<Helper_API>();
@@ -81,7 +80,6 @@ namespace Song.ViewData.Methods
         /// <exception cref="System.Exception">异常</exception>
         [HttpGet]
         [Localhost]
-        [Admin]
         public Helper_API_Method[] Methods(string classname)
         {
             string assemblyName = "Song.ViewData";
@@ -141,7 +139,6 @@ namespace Song.ViewData.Methods
         #region 数据字典
         [Localhost]
         [HttpPost]
-        [SuperAdmin]
         public string Entities()
         {
             return this.Entities(string.Empty);
@@ -209,15 +206,14 @@ namespace Song.ViewData.Methods
         /// <param name="name"></param>
         /// <returns></returns>
         [HttpPost]
-        [SuperAdmin]
         [Localhost]
         public string EntityField(string name)
         {
             if (string.IsNullOrWhiteSpace(name)) return null;
             Assembly assembly = Assembly.LoadFrom(AppDomain.CurrentDomain.BaseDirectory + "\\bin\\Song.Entities.dll");
             Type type = assembly.GetExportedTypes()
-                .Where(t => t.FullName.Substring(t.FullName.Length - name.Length).Equals(name, StringComparison.CurrentCultureIgnoreCase))
-                .FirstOrDefault();
+              .Where(t => t.FullName.Substring(t.FullName.Length - name.Length - 1).Equals("." + name, StringComparison.CurrentCultureIgnoreCase))
+              .FirstOrDefault();
             if (type == null) return null;
 
             JObject fields = new JObject();
@@ -256,15 +252,14 @@ namespace Song.ViewData.Methods
         /// <param name="name">实体名称</param>
         /// <param name="detail">实体的详情说明,json格式</param>
         /// <returns>返回实体详情</returns>
-        [SuperAdmin]
         [HttpPost]
         public string EntityDetails(string name, string detail)
         {
             if (string.IsNullOrWhiteSpace(name)) return null;
             Assembly assembly = Assembly.LoadFrom(AppDomain.CurrentDomain.BaseDirectory + "\\bin\\Song.Entities.dll");
             Type type = assembly.GetExportedTypes()
-                .Where(t => t.FullName.Substring(t.FullName.Length - name.Length).Equals(name, StringComparison.CurrentCultureIgnoreCase))
-                .FirstOrDefault();
+               .Where(t => t.FullName.Substring(t.FullName.Length - name.Length - 1).Equals("." + name, StringComparison.CurrentCultureIgnoreCase))
+               .FirstOrDefault();
             if (type == null) return null;
             //读取或写入
             string file = string.Format("{0}help\\datas\\Entitiy\\{1}.json", AppDomain.CurrentDomain.BaseDirectory, name);

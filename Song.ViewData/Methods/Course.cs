@@ -66,16 +66,24 @@ namespace Song.ViewData.Methods
         {
             int count = 0;
             List<Song.Entities.Course> eas = null;
-            eas = Business.Do<ICourse>().CoursePager(orgid, sbjids, true, search, "", size, index, out count);
+            string order = "new";
+            if (string.IsNullOrWhiteSpace(sbjids) || sbjids == "0") order = "rec";
+            eas = Business.Do<ICourse>().CoursePager(orgid, sbjids, true, search, order, size, index, out count);
             string vpath = WeiSha.Common.Upload.Get["Course"].Virtual;
+            string hpath = WeiSha.Common.Upload.Get["Course"].Physics;
             for (int i = 0; i < eas.Count; i++)
             {
                 Song.Entities.Course c = eas[i];
                 //图片和缩略图
-                c.Cou_Logo = vpath + c.Cou_Logo;
-                c.Cou_LogoSmall = vpath + c.Cou_LogoSmall;
-                if (!System.IO.File.Exists(c.Cou_Logo)) c.Cou_Logo = "";
-                if (!System.IO.File.Exists(c.Cou_LogoSmall)) c.Cou_LogoSmall = "";
+                if (!System.IO.File.Exists(hpath + c.Cou_Logo))
+                    c.Cou_Logo = "";
+                else
+                    c.Cou_Logo = vpath + c.Cou_Logo;
+                if (!System.IO.File.Exists(hpath + c.Cou_LogoSmall))
+                    c.Cou_LogoSmall = "";
+                else
+                    c.Cou_LogoSmall = vpath + c.Cou_LogoSmall;
+
                 //是否免费，或是限时免费
                 if (c.Cou_IsLimitFree)
                 {
@@ -163,10 +171,11 @@ namespace Song.ViewData.Methods
         /// </summary>
         /// <param name="couid"></param>
         /// <returns></returns>
-        [Student]
+        //[Student]
         public bool Studied(int couid)
         {
             Song.Entities.Accounts acc = this.Student;
+            if (acc == null) return false;
             bool isBuy = Business.Do<ICourse>().StudyIsCourse(acc.Ac_ID, couid);
             return isBuy;
         }
